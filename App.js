@@ -8,7 +8,7 @@ import Root from "./navigation/tab"
 
 export default App = () => {
   const [token, setToken] = useState("")
-  const register = async () => {
+  const getToken = async () => {
     const { status } = await Permissions.askAsync(
       Permissions.NOTIFICATIONS
     )
@@ -19,8 +19,9 @@ export default App = () => {
     setToken(value)
   }
   useEffect(() => {
-    register()
+    getToken()
   }, [])
+  console.log(token)
   return (
     <Root />
   );
