@@ -1,6 +1,7 @@
+// MODULE IMPORTS
 import React from 'react';
-import { Button, Card } from 'react-native-paper';
-
+import { Button, Card, Paragraph } from 'react-native-paper';
+// FILE IMPORTS
 import styles from "../styles"
 
 export default CardComponent = ({
@@ -9,14 +10,18 @@ export default CardComponent = ({
     detailUrl,
     imageUrl,
     navigation,
+    code,
     type
 }) => (
         <Card
             style={styles.card}
             elevation={5}
         >
-            <Card.Title title={title} subtitle={date} />
             <Card.Cover source={{ uri: imageUrl }} />
+            <Card.Title title={title} subtitle={date} />
+            <Card.Content>
+                <Paragraph>{code}</Paragraph>
+            </Card.Content>
             <Card.Actions>
                 <Button
                     onPress={() => navigation.navigate(
