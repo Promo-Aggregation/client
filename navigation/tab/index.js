@@ -2,10 +2,9 @@
 import React from "react";
 import { createAppContainer } from 'react-navigation';
 import { createMaterialBottomTabNavigator } from 'react-navigation-material-bottom-tabs';
-import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 // FILE IMPORTS
-import Home from "../../screens/home";
-import Favorites from "../../screens/favorites";
+import { HomeStack as Home, SubscriptionsStack as Subscriptions } from "../stack";
 
 
 const TabNavigator = createMaterialBottomTabNavigator({
@@ -22,13 +21,13 @@ const TabNavigator = createMaterialBottomTabNavigator({
             )
         }
     },
-    Favorites: {
-        screen: Favorites,
+    Subscriptions: {
+        screen: Subscriptions,
         navigationOptions: {
-            title: "Favorites",
+            title: "Subscriptions",
             tabBarIcon: ({ focused }) => (
-                <MaterialIcons
-                    name="favorite"
+                <Ionicons
+                    name="md-pricetags"
                     color={focused ? "red" : "black"}
                     size={24}
                 />

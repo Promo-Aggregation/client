@@ -5,5 +5,11 @@ export default styles = StyleSheet.create({
         flex: 1,
         alignItems: "center",
         justifyContent: "center"
+    },
+    detail: {
+        flex: 1
+    },
+    card: {
+        margin: 20
     }
 });
