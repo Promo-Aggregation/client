@@ -1,89 +1,160 @@
 // MODULE IMPORTS
-import React, { useState, useEffect } from 'react';
-import { View, Button, FlatList } from 'react-native';
+import React, { useState, useEffect } from "react";
+import { View, Button, FlatList, TextInput, Text } from "react-native";
+import { Notifications } from "expo";
+import * as Permissions from "expo-permissions";
+import PercentageCircle from "react-native-percentage-circle";
+import { useDispatch } from "react-redux";
 import Axios from "axios";
+import queryString from "query-string";
 //FILE IMPORTS
+import { refresh, login } from "../store/actions";
 import Card from "../components/card";
 import Chip from "../components/chip";
+import categories from "../categories";
+import styles from "../styles";
 
 export default Home = ({ navigation }) => {
-    const [tags, setTags] = useState([])
-    const [promos, setPromos] = useState([])
-    const toggle = (newTag) => {
-        if (tags.indexOf(newTag) === -1) {
-            setTags([...tags, newTag])
+  const dispatch = useDispatch();
+  const [status, setStatus] = useState(false);
+  const [text, setText] = useState("");
+  const [tags, setTags] = useState([]);
+  const [promos, setPromos] = useState([]);
+  const [progress, setProgress] = useState(1);
+  const getToken = async () => {
+    const { status } = await Permissions.askAsync(Permissions.NOTIFICATIONS);
+    if (status !== "granted") {
+      return;
+    }
+    const value = await Notifications.getExpoPushTokenAsync();
+    dispatch(login(value));
+  };
+  const timerHandler = (limit, interval) => {
+    const id = setInterval(() => {
+      setProgress(prev => {
+        if (prev > limit) {
+          clearInterval(id);
+          return prev;
         } else {
-            tags.splice(tags.indexOf(newTag), 1)
-            setTags(tags)
+          return prev + 1;
         }
-    }
-    const filter = () => {
-        console.log(tags)
-    }
-    const fetchAll = async () => {
-        const { data: foods } = await Axios.get("http://localhost:3000/promos/dana-food")
-        setPromos(foods)
-        const { data: games } = await Axios.get("http://localhost:3000/promos/dana-game")
-        setPromos([...promos, ...games])
-        const { data: entertainment } = await Axios.get("http://localhost:3000/promos/dana-entertainment")
-        setPromos([...promos, ...entertainment])
-    }
-    useEffect(() => {
-        fetchAll()
-    }, [])
-    return (
-        <>
-            <View
-                style={{
-                    flexDirection: "row",
-                    flexWrap: "wrap",
-                    margin: 5,
-                    justifyContent: "center"
-                }}
-            >
-                <Chip
-                    title="Food"
-                    icon="food"
-                    toggle={toggle}
-                />
-                <Chip
-                    title="Entertainment"
-                    icon={require("../assets/entertainment.png")}
-                    toggle={toggle}
-                />
-                <Chip
-                    title="Gaming"
-                    icon="gamepad-variant"
-                    toggle={toggle}
-                />
-            </View>
-            <View style={{
-                justifyContent: "flex-end",
-                flexDirection: "row",
-                marginRight: 30
-            }}>
-                <Button
-                    title="Filter"
-                    color="#e60000"
-                    onPress={filter}
-                    style={{ position: "relative", marginLeft: 250 }}
-                />
-            </View>
-            <FlatList
-                data={promos}
-                keyExtractor={(item, index) => String(index)}
-                renderItem={({ item: { title, date, kodePromo, detailUrl, imageUrl } }) => (
-                    <Card
-                        title={title}
-                        date={date}
-                        code={kodePromo || "No Promo Code"}
-                        detailUrl={detailUrl}
-                        imageUrl={imageUrl}
-                        navigation={navigation}
-                        type="home"
-                    />
-                )}
-            />
-        </>
+      });
+    }, interval);
+  };
+  const fetchAll = async () => {
+    timerHandler(80, 15);
+    setStatus(true);
+    const { data } = await Axios.get(
+      "https://promo-aggregator.crowfx.online/promos"
     );
-}
+    setStatus(false);
+    setPromos(data);
+    timerHandler(100, 1);
+  };
+  const search = async () => {
+    try {
+      const { data } = await Axios({
+        method: "get",
+        url: `https://promo-aggregator.crowfx.online/promos/search?q=${text}`
+      });
+      setPromos(data);
+    } catch (e) {
+      console.log(e);
+    }
+  };
+  const remove = removed => {
+    setTags(prev => prev.filter(tag => tag !== removed));
+  };
+  const add = added => {
+    setTags(prev => [...prev, added]);
+  };
+  const refetch = async () => {
+    const { data } = await Axios({
+      method: "get",
+      url: `https://promo-aggregator.crowfx.online/promos?offset=${promos.length}`
+    });
+    setPromos([...promos, ...data]);
+  };
+  useEffect(() => {
+    fetchAll();
+    dispatch(refresh());
+    getToken();
+  }, []);
+  useEffect(() => {
+    let url = "https://promo-aggregator.crowfx.online/promos/tags";
+    const qs = queryString.stringify({ tags });
+    if (tags.length > 0) {
+      Axios({
+        method: "get",
+        url: `${url}?${qs}`
+      })
+        .then(({ data: promos }) => {
+          setPromos(promos);
+        })
+        .catch(e => {
+          console.log(e);
+        });
+    }
+  }, [tags]);
+  if (progress < 100) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.text}>Loading...</Text>
+        <PercentageCircle
+          radius={75}
+          percent={progress}
+          color="#19f"
+          textStyle={{ fontSize: 15, color: "#19f" }}
+          borderWidth={5}
+        />
+      </View>
+    );
+  }
+  return (
+    <>
+      <View style={styles.view}>
+        <TextInput
+          placeholder="Search..."
+          style={styles.input}
+          value={text}
+          onChangeText={setText}
+          onSubmitEditing={search}
+        />
+        <View style={styles.search}>
+          <Button
+            title="Search"
+            color="#19f"
+            onPress={search}
+            style={{ position: "relative", marginLeft: 250 }}
+          />
+        </View>
+      </View>
+      <View style={styles.bulkChip}>
+        {categories.map((category, index) => (
+          <Chip
+            title={category.name}
+            icon={category.icon}
+            key={index}
+            remove={remove}
+            add={add}
+          />
+        ))}
+      </View>
+      <FlatList
+        data={promos}
+        keyExtractor={(_, index) => String(index)}
+        renderItem={({ item }) =>
+          item.title &&
+          item.date &&
+          item.detailUrl &&
+          item.imageUrl && (
+            <Card promo={item} navigation={navigation} type="home" />
+          )
+        }
+        onEndReached={refetch}
+        refreshing={status}
+        onRefresh={fetchAll}
+      />
+    </>
+  );
+};

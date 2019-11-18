@@ -1,45 +1,47 @@
 // MODULE IMPORTS
 import React from "react";
-import { createAppContainer } from 'react-navigation';
-import { createMaterialBottomTabNavigator } from 'react-navigation-material-bottom-tabs';
-import { Ionicons } from "@expo/vector-icons";
+import { createAppContainer } from "react-navigation";
+import { createMaterialBottomTabNavigator } from "react-navigation-material-bottom-tabs";
+import { Ionicons, Entypo } from "@expo/vector-icons";
 // FILE IMPORTS
-import { HomeStack as Home, SubscriptionsStack as Subscriptions } from "../stack";
+import {
+  HomeStack as Home,
+  SubscriptionsStack as Subscriptions,
+  NewestStack as Newest
+} from "../stack";
 
-
-const TabNavigator = createMaterialBottomTabNavigator({
+const TabNavigator = createMaterialBottomTabNavigator(
+  {
     Home: {
-        screen: Home,
-        navigationOptions: {
-            title: "Home",
-            tabBarIcon: ({ focused }) => (
-                <Ionicons
-                    name="ios-home"
-                    color={focused ? "red" : "black"}
-                    size={24}
-                />
-            )
-        }
+      screen: Home,
+      navigationOptions: {
+        title: "Home",
+        tabBarIcon: () => <Ionicons name="ios-home" color="#fff" size={24} />,
+        tabBarColor: "#19f"
+      }
+    },
+    Newest: {
+      screen: Newest,
+      navigationOptions: {
+        title: "Newest",
+        tabBarIcon: () => <Entypo name="new" color="#fff" size={24} />,
+        tabBarColor: "#19f"
+      }
     },
     Subscriptions: {
-        screen: Subscriptions,
-        navigationOptions: {
-            title: "Subscriptions",
-            tabBarIcon: ({ focused }) => (
-                <Ionicons
-                    name="md-pricetags"
-                    color={focused ? "red" : "black"}
-                    size={24}
-                />
-            ),
-        }
+      screen: Subscriptions,
+      navigationOptions: {
+        title: "Subscriptions",
+        tabBarIcon: () => (
+          <Ionicons name="md-pricetags" color="#fff" size={24} />
+        ),
+        tabBarColor: "#19f"
+      }
     }
-},
-    {
-        shifting: true,
-        activeColor: "#000",
-        inactiveColor: "#888",
-        barStyle: { backgroundColor: "#fff" },
-    });
+  },
+  {
+    shifting: true
+  }
+);
 
 export default createAppContainer(TabNavigator);

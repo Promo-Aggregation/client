@@ -1,28 +1,14 @@
 // MODULE IMPORTS
-import React, { useState, useEffect } from 'react';
-import { Notifications } from 'expo';
-import * as Permissions from "expo-permissions";
+import React from "react";
+import { Provider } from "react-redux";
 // FILE IMPORTS
-import Root from "./navigation/tab"
-
+import Root from "./navigation/tab";
+import store from "./store";
 
 export default App = () => {
-  const [token, setToken] = useState("")
-  const getToken = async () => {
-    const { status } = await Permissions.askAsync(
-      Permissions.NOTIFICATIONS
-    )
-    if (status !== 'granted') {
-      return;
-    }
-    const value = await Notifications.getExpoPushTokenAsync()
-    setToken(value)
-  }
-  useEffect(() => {
-    getToken()
-  }, [])
-  console.log(token)
   return (
-    <Root />
+    <Provider store={store}>
+      <Root />
+    </Provider>
   );
-}
+};
