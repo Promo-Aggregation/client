@@ -14,7 +14,11 @@ export default styles = StyleSheet.create({
   card: {
     margin: 20
   },
-  empty: { height: height, width: width },
+  empty: { height, width },
+  emptySearch: {
+    height: height * 0.8,
+    width
+  },
   text: {
     margin: 20,
     fontSize: 20,

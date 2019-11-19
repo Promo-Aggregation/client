@@ -1,7 +1,8 @@
 // MODULE IMPORTS
 import React, { useState, useEffect } from "react";
-import { Title, Text, Divider } from "react-native-paper";
+import { Title, Text, Divider, Button } from "react-native-paper";
 import { View, Image, Dimensions, ScrollView } from "react-native";
+import * as WebBrowser from "expo-web-browser";
 //FILE IMPORTS
 import styles from "../styles";
 
@@ -53,20 +54,27 @@ export default Detail = ({ navigation }) => {
             </Text>
           ))}
         </View>
-        <Divider style={{ margin: 10 }} />
-        <Text style={{ fontSize: 20, marginLeft: 10 }}>
-          Cara Berpartisipasi:
-        </Text>
-        <View style={{ margin: 10, paddingHorizontal: 5 }}>
-          {cara.map((way, index) => (
-            <Text
-              key={index}
-              style={{ marginVertical: 5, textAlign: "justify" }}
-            >
-              {way}
+        {cara.length > 0 && (
+          <>
+            <Divider style={{ margin: 10 }} />
+            <Text style={{ fontSize: 20, marginLeft: 10 }}>
+              Cara Berpartisipasi:
             </Text>
-          ))}
-        </View>
+            <View style={{ margin: 10, paddingHorizontal: 5 }}>
+              {cara.map((way, index) => (
+                <Text
+                  key={index}
+                  style={{ marginVertical: 5, textAlign: "justify" }}
+                >
+                  {way}
+                </Text>
+              ))}
+            </View>
+          </>
+        )}
+        <Button onPress={() => WebBrowser.openBrowserAsync(detailUrl)}>
+          Open In Web
+        </Button>
       </ScrollView>
     </View>
   );
