@@ -1,6 +1,6 @@
 // MODULE IMPORTS
 import React, { useState, useEffect } from "react";
-import { View, Button, FlatList, TextInput, Text } from "react-native";
+import { View, Button, FlatList, TextInput, Text, Image } from "react-native";
 import { Notifications } from "expo";
 import * as Permissions from "expo-permissions";
 import PercentageCircle from "react-native-percentage-circle";
@@ -42,10 +42,11 @@ export default Home = ({ navigation }) => {
     }, interval);
   };
   const fetchAll = async () => {
+    setText("");
     timerHandler(80, 15);
     setStatus(true);
     const { data } = await Axios.get(
-      "https://promo-aggregator.crowfx.online/promos"
+      "https://promo-aggregator.crowfx.online/promos?limit=1000"
     );
     setStatus(false);
     setPromos(data);
@@ -53,9 +54,15 @@ export default Home = ({ navigation }) => {
   };
   const search = async () => {
     try {
+      const url =
+        "https://promo-aggregator.crowfx.online/promos/searchWithTags";
+      const query = queryString.stringify({
+        tags,
+        q: text
+      });
       const { data } = await Axios({
         method: "get",
-        url: `https://promo-aggregator.crowfx.online/promos/search?q=${text}`
+        url: `${url}?${query}`
       });
       setPromos(data);
     } catch (e) {
@@ -68,34 +75,27 @@ export default Home = ({ navigation }) => {
   const add = added => {
     setTags(prev => [...prev, added]);
   };
-  const refetch = async () => {
-    const { data } = await Axios({
-      method: "get",
-      url: `https://promo-aggregator.crowfx.online/promos?offset=${promos.length}`
-    });
-    setPromos([...promos, ...data]);
-  };
   useEffect(() => {
     fetchAll();
     dispatch(refresh());
     getToken();
   }, []);
-  useEffect(() => {
-    let url = "https://promo-aggregator.crowfx.online/promos/tags";
-    const qs = queryString.stringify({ tags });
-    if (tags.length > 0) {
-      Axios({
-        method: "get",
-        url: `${url}?${qs}`
-      })
-        .then(({ data: promos }) => {
-          setPromos(promos);
-        })
-        .catch(e => {
-          console.log(e);
-        });
-    }
-  }, [tags]);
+  // useEffect(() => {
+  //   let url = "https://promo-aggregator.crowfx.online/promos/tags";
+  //   const qs = queryString.stringify({ tags });
+  //   if (tags.length > 0) {
+  //     Axios({
+  //       method: "get",
+  //       url: `${url}?${qs}`
+  //     })
+  //       .then(({ data: promos }) => {
+  //         setPromos(promos);
+  //       })
+  //       .catch(e => {
+  //         console.log(e);
+  //       });
+  //   }
+  // }, [tags]);
   if (progress < 100) {
     return (
       <View style={styles.container}>
@@ -140,21 +140,27 @@ export default Home = ({ navigation }) => {
           />
         ))}
       </View>
-      <FlatList
-        data={promos}
-        keyExtractor={(_, index) => String(index)}
-        renderItem={({ item }) =>
-          item.title &&
-          item.date &&
-          item.detailUrl &&
-          item.imageUrl && (
-            <Card promo={item} navigation={navigation} type="home" />
-          )
-        }
-        onEndReached={refetch}
-        refreshing={status}
-        onRefresh={fetchAll}
-      />
+      {promos.length > 0 ? (
+        <FlatList
+          data={promos}
+          keyExtractor={(_, index) => String(index)}
+          renderItem={({ item }) =>
+            item.title &&
+            item.date &&
+            item.detailUrl &&
+            item.imageUrl && (
+              <Card promo={item} navigation={navigation} type="home" />
+            )
+          }
+          refreshing={status}
+          onRefresh={fetchAll}
+        />
+      ) : (
+        <Image
+          source={require("../assets/empty.png")}
+          style={styles.emptySearch}
+        />
+      )}
     </>
   );
 };
