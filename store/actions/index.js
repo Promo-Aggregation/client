@@ -103,27 +103,39 @@ export const login = token => async dispatch => {
 
 export const subscribed = token => async dispatch => {
   dispatch(setStatusLimit(80));
-  const [
-    { data: userSubscriptions },
-    { data: newSubscriptions }
-  ] = await Promise.all([
-    Axios({
+  try {
+    const [
+      { data: userSubscriptions },
+      { data: newSubscriptions }
+    ] = await Promise.all([
+      Axios({
+        method: "get",
+        url: "https://promo-aggregator.crowfx.online/promos/subscribed",
+        headers: {
+          device_token: token
+        }
+      }),
+      Axios({
+        method: "get",
+        url: "https://promo-aggregator.crowfx.online/promos/new-promos",
+        headers: {
+          device_token: token
+        }
+      })
+    ]);
+    dispatch(setStatusLimit(100));
+    dispatch(setSubscriptions([...newSubscriptions, ...userSubscriptions]));
+  } catch (e) {
+    const { data } = await Axios({
       method: "get",
       url: "https://promo-aggregator.crowfx.online/promos/subscribed",
       headers: {
         device_token: token
       }
-    }),
-    Axios({
-      method: "get",
-      url: "https://promo-aggregator.crowfx.online/promos/new-promos",
-      headers: {
-        device_token: token
-      }
-    })
-  ]);
-  dispatch(setStatusLimit(100));
-  dispatch(setSubscriptions([...newSubscriptions, ...userSubscriptions]));
+    });
+    dispatch(setStatusLimit(100));
+    dispatch(setSubscriptions(data));
+  }
 };
 
 export const extendedSubscribed = (

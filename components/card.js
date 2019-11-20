@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { Dimensions, TouchableOpacity } from "react-native";
 import { Button, Card, Paragraph, Chip } from "react-native-paper";
 import Axios from "axios";
-import { setUser } from "../store/actions";
+import { setUser, subscribed } from "../store/actions";
 // FILE IMPORTS
 import styles from "../styles";
 
@@ -26,6 +26,7 @@ export default CardComponent = ({ promo, type, navigation, verify }) => {
       }
     });
     dispatch(setUser(user));
+    dispatch(subscribed(user.device_token));
     alert("Subscribed!");
   };
   const verifyPath = () => {
@@ -47,7 +48,8 @@ export default CardComponent = ({ promo, type, navigation, verify }) => {
       <Card.Title title={promo.title} subtitle={promo.date} />
       <Card.Content style={{ flexDirection: "row" }}>
         {promo.tags.map((tag, index) => {
-          return subscriptions.indexOf(tag) === -1 &&
+          return subscriptions &&
+            subscriptions.indexOf(tag) === -1 &&
             type !== "subscriptions" ? (
             <Chip
               key={index}
@@ -62,7 +64,9 @@ export default CardComponent = ({ promo, type, navigation, verify }) => {
             >
               {tag}
             </Chip>
-          ) : type === "subscriptions" ? (
+          ) : type === "subscriptions" &&
+            subscriptions &&
+            subscriptions.indexOf(tag) > -1 ? (
             <Chip
               key={index}
               style={{
@@ -73,6 +77,21 @@ export default CardComponent = ({ promo, type, navigation, verify }) => {
               }}
               selectedColor={"#fff"}
               onPress={() => verify(promo.tags)}
+            >
+              {tag}
+            </Chip>
+          ) : type === "subscriptions" &&
+            subscriptions &&
+            subscriptions.indexOf(tag) === -1 ? (
+            <Chip
+              key={index}
+              style={{
+                margin: 5,
+                width: 0.2 * width,
+                backgroundColor: "#e6e6e6",
+                alignItems: "center"
+              }}
+              selectedColor={"#000"}
             >
               {tag}
             </Chip>
