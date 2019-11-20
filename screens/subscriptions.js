@@ -6,25 +6,35 @@ import { Provider, Portal, Dialog, Title, Button } from "react-native-paper";
 import Multi from "react-native-multiple-select-list";
 import Axios from "axios";
 //FILE IMPORTS
-import { subscribed, extendedSubscribed } from "../store/actions";
+import { subscribed, setUser, extendedSubscribed } from "../store/actions";
 import Card from "../components/card";
 
 export default Subscriptions = ({ navigation }) => {
   const [visible, setVisible] = useState(false);
+  const [filteredSelected, setFilteredSelected] = useState([]);
   const [tags, setTags] = useState([]);
   const [filteredTags, setFiltered] = useState([]);
   const dispatch = useDispatch();
-  const { token, subscriptions } = useSelector(state => state.userReducer);
+  const { token, subscribedPromos, subscriptions } = useSelector(
+    state => state.userReducer
+  );
   const { status } = useSelector(state => state.promoReducer);
   const verify = tags => {
     setTags(tags);
+    let result = [];
+    subscriptions.forEach(subscription => {
+      if (tags.indexOf(subscription) > -1) {
+        result.push(String(tags.indexOf(subscription)));
+      }
+    });
+    setFilteredSelected(result);
     setVisible(true);
   };
   const unsubscribe = async () => {
     if (filteredTags.length === 0) {
       alert("Please Select A Category");
     } else {
-      await Axios({
+      const { data: user } = await Axios({
         method: "put",
         url: "https://promo-aggregator.crowfx.online/subscriptions/unsubscribe",
         data: {
@@ -34,7 +44,7 @@ export default Subscriptions = ({ navigation }) => {
           device_token: token
         }
       });
-      dispatch(subscribed(token));
+      dispatch(setUser(user));
       alert("Unsubscribed!");
       setVisible(false);
     }
@@ -42,13 +52,13 @@ export default Subscriptions = ({ navigation }) => {
   useEffect(() => {
     dispatch(subscribed(token));
   }, []);
-  return subscriptions.length === 0 ? (
+  return subscribedPromos.length === 0 ? (
     <Image source={require("../assets/empty.png")} style={styles.empty} />
   ) : (
     <Provider>
       <Portal>
         <FlatList
-          data={subscriptions}
+          data={subscribedPromos}
           keyExtractor={(_, index) => String(index)}
           renderItem={({ item }) =>
             item.title &&
@@ -65,7 +75,11 @@ export default Subscriptions = ({ navigation }) => {
           }
           onEndReached={() =>
             dispatch(
-              extendedSubscribed(token, subscriptions.length, subscriptions)
+              extendedSubscribed(
+                token,
+                subscribedPromos.length,
+                subscribedPromos
+              )
             )
           }
           refreshing={status < 100}
@@ -94,7 +108,7 @@ export default Subscriptions = ({ navigation }) => {
               iconSize={30}
               selectedIconName={"ios-checkmark-circle-outline"}
               unselectedIconName={"ios-radio-button-off"}
-              selected={["0", "1"]}
+              selected={filteredSelected}
             />
           </View>
           <Dialog.Actions>

@@ -1,5 +1,6 @@
 // MODULE IMPORTS
 import React from "react";
+import { FlatList } from "react-native";
 import { createAppContainer } from "react-navigation";
 import { createMaterialBottomTabNavigator } from "react-navigation-material-bottom-tabs";
 import { Ionicons, Entypo } from "@expo/vector-icons";

@@ -13,8 +13,9 @@ export default ChipComponent = ({ title, icon, remove, add }) => {
       icon={isActive ? "check" : icon}
       style={{
         margin: 5,
-        backgroundColor: isActive ? "#b3b3b3" : "#e6e6e6"
+        backgroundColor: isActive ? "#19f" : "#e6e6e6"
       }}
+      selectedColor={isActive ? "#fff" : "#000"}
       selected={isActive}
       onPress={toggle}
     >

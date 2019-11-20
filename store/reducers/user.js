@@ -3,7 +3,8 @@ import { DISPLAY_USER, DISPLAY_SUBSCRIPTIONS } from "../constants";
 
 const initialState = {
   token: "",
-  subscriptions: []
+  subscriptions: [],
+  subscribedPromos: []
 };
 
 export default userReducer = (state = initialState, action) => {
@@ -15,7 +16,7 @@ export default userReducer = (state = initialState, action) => {
         subscriptions: action.user.subscription
       };
     case DISPLAY_SUBSCRIPTIONS:
-      return { ...state, subscriptions: action.subscriptions };
+      return { ...state, subscribedPromos: action.subscriptions };
     default:
       return state;
   }
