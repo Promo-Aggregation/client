@@ -1,6 +1,6 @@
 // MODULE IMPORTS
 import React, { useState, useEffect } from "react";
-import { View, Button, FlatList, TextInput, Text, Image } from "react-native";
+import { Button, View, FlatList, TextInput, Text, Image } from "react-native";
 import { Notifications } from "expo";
 import * as Permissions from "expo-permissions";
 import PercentageCircle from "react-native-percentage-circle";
@@ -53,9 +53,26 @@ export default Home = ({ navigation }) => {
     timerHandler(100, 1);
   };
   const search = async () => {
-    try {
+    if (!text && !tags.length) {
+      fetchAll();
+    } else if (!tags.length) {
+      const url = "https://promo-aggregator.crowfx.online/promos/search";
+      const query = queryString.stringify({
+        q: text
+      });
+      try {
+        const { data } = await Axios({
+          method: "get",
+          url: `${url}?${query}`
+        });
+        setPromos(data);
+        setText("");
+      } catch (e) {
+        alert(e.response.data.message);
+      }
+    } else {
       const url =
-        "https://promo-aggregator.crowfx.online/promos/searchWithTags";
+        "https://promo-aggregator.crowfx.online/promos/searchWithTagsAggregate";
       const query = queryString.stringify({
         tags,
         q: text
@@ -65,8 +82,7 @@ export default Home = ({ navigation }) => {
         url: `${url}?${query}`
       });
       setPromos(data);
-    } catch (e) {
-      console.log(e);
+      setText("");
     }
   };
   const remove = removed => {
@@ -80,22 +96,6 @@ export default Home = ({ navigation }) => {
     dispatch(refresh());
     getToken();
   }, []);
-  // useEffect(() => {
-  //   let url = "https://promo-aggregator.crowfx.online/promos/tags";
-  //   const qs = queryString.stringify({ tags });
-  //   if (tags.length > 0) {
-  //     Axios({
-  //       method: "get",
-  //       url: `${url}?${qs}`
-  //     })
-  //       .then(({ data: promos }) => {
-  //         setPromos(promos);
-  //       })
-  //       .catch(e => {
-  //         console.log(e);
-  //       });
-  //   }
-  // }, [tags]);
   if (progress < 100) {
     return (
       <View style={styles.container}>
