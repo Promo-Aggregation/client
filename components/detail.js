@@ -7,13 +7,14 @@ import * as WebBrowser from "expo-web-browser";
 export default Detail = ({ navigation }) => {
   const [size, setSize] = useState({});
   const promo = navigation.getParam("promo");
-  const {
+  let {
     title,
     imageUrl,
     detailUrl,
     detail: { syaratKetentuan, cara },
     minimalTransaction
   } = promo;
+  imageUrl = imageUrl.includes("https") ? imageUrl : `https:${imageUrl}`;
   const minimum = () => {
     const number_string = minimalTransaction.toString();
     const remainder = number_string.length % 3;

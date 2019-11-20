@@ -45,6 +45,7 @@ export default Subscriptions = ({ navigation }) => {
         }
       });
       dispatch(setUser(user));
+      dispatch(subscribed(user.device_token));
       alert("Unsubscribed!");
       setVisible(false);
     }
@@ -57,34 +58,38 @@ export default Subscriptions = ({ navigation }) => {
   ) : (
     <Provider>
       <Portal>
-        <FlatList
-          data={subscribedPromos}
-          keyExtractor={(_, index) => String(index)}
-          renderItem={({ item }) =>
-            item.title &&
-            item.date &&
-            item.detailUrl &&
-            item.imageUrl && (
-              <Card
-                promo={item}
-                navigation={navigation}
-                type="subscriptions"
-                verify={verify}
-              />
-            )
-          }
-          onEndReached={() =>
-            dispatch(
-              extendedSubscribed(
-                token,
-                subscribedPromos.length,
-                subscribedPromos
+        {subscribedPromos.length > 0 ? (
+          <FlatList
+            data={subscribedPromos}
+            keyExtractor={(_, index) => String(index)}
+            renderItem={({ item }) =>
+              item.title &&
+              item.date &&
+              item.detailUrl &&
+              item.imageUrl && (
+                <Card
+                  promo={item}
+                  navigation={navigation}
+                  type="subscriptions"
+                  verify={verify}
+                />
               )
-            )
-          }
-          refreshing={status < 100}
-          onRefresh={() => dispatch(subscribed(token))}
-        />
+            }
+            onEndReached={() =>
+              dispatch(
+                extendedSubscribed(
+                  token,
+                  subscribedPromos.length,
+                  subscribedPromos
+                )
+              )
+            }
+            refreshing={status < 100}
+            onRefresh={() => dispatch(subscribed(token))}
+          />
+        ) : (
+          <Image source={require("../assets/empty.png")} style={styles.empty} />
+        )}
         <Dialog visible={visible} onDismiss={() => setVisible(false)}>
           <Title style={{ textAlign: "center", padding: 15 }}>Category:</Title>
           <View style={{ margin: 10 }}>
