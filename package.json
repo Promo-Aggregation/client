@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "@react-native-community/art": "^1.0.3",
-    "axios": "^0.19.0",
+    "axios": "^0.21.1",
     "expo": "^35.0.0",
     "expo-permissions": "^7.0.0",
     "expo-web-browser": "~7.0.1",
